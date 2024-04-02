@@ -14,8 +14,7 @@ pipeline {
     stages {
         stage('checkout') {
             steps {
-                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/codetobuild/simple-springapp.git'
-                echo 'Hello World'checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/codetobuild/simple-springapp']])
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/codetobuild/simple-springapp']])
             }
         }
         stage('build maven') { // Added a stage name

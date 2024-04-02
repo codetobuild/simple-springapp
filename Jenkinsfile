@@ -12,26 +12,36 @@ pipeline {
 }
 
     stages {
-        stage('checkout') {
+        stage('Checkout') {
             steps {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/codetobuild/simple-springapp']])
             }
         }
-        stage('build maven') { // Added a stage name
+        stage('Build') {
             steps {
                 sh 'mvn clean install'
             }
         }
-        stage('buld docker image'){
+        
+        stage('Code Quality Analysis'){
+                
+            steps {
+                script {
+                    withSonarQubeEnv('sonarserver') {
+                        sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=springapp -Dsonar.projectName=springapp -Dsonar.host.url=http://localhost:9000'
+                    }
+                }
+        }
+        }
+        stage('Build docker image'){
             steps{
                 script{
                     // sh 'docker build -t springappdemo .'
                   dockerImage = docker.build registry + ":$BUILD_NUMBER"
-
                 }
             }
         }
-      stage('Deploy Image') {
+      stage('Publish Docker Image') {
           steps{
             script {
               docker.withRegistry( '', registryCredential ) {
@@ -47,7 +57,6 @@ pipeline {
                 sh "docker run -d -p 8083:8083 ${registry}:${BUILD_ID}"
             }
         }
-        
     }
     post{
         success{
